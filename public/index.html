@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spotify Discover</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        input { padding: 8px; width: 300px; }
+        button { padding: 8px 12px; margin-left: 5px; }
+        ul { list-style: none; padding: 0; }
+        li { margin: 10px 0; }
+      </style>
+  </head>
+  <body>
+    <h1>Find Similar Spotify Tracks</h1>
+    <input type="text" id="song" placeholder="Song name" />
+    <input type="text" id="artist" placeholder="Artist name" />
+    <button id="searchButton">Search</button>
+
+    <ul id="results"></ul>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        async function search() {
+          const song = document.getElementById("song").value;
+          const artist = document.getElementById("artist").value;
+
+          if (!song || !artist) {
+            alert("Please enter both song and artist names.");
+            return;
+          }
+
+          const res = await fetch(
+            `/search?song=${encodeURIComponent(
+              song
+            )}&artist=${encodeURIComponent(artist)}`
+          );
+          const data = await res.json();
+
+          const list = document.getElementById("results");
+          list.innerHTML = "";
+
+          if (data.results && data.results.length > 0) {
+            data.results.forEach((track) => {
+              const li = document.createElement("li");
+              li.innerHTML = `
+              <strong>${track.name}</strong> by ${track.artists
+                .map((a) => a.name)
+                .join(", ")}
+              <br>
+              <audio controls src="${track.preview_url}"></audio>
+            `;
+              list.appendChild(li);
+            });
+          } else {
+            list.innerHTML = "<li>No similar songs found.</li>";
+          }
+        }
+        const searchButton = document.getElementById("searchButton");
+        searchButton.addEventListener("click", search);
+      });
+    </script>
+  </body>
+</html>
